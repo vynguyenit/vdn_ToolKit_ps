@@ -1,173 +1,75 @@
-markdown
+# Tai lieu Ky thuat & Phat trien vdn ToolKit
 
-\# vdn ToolKit
+Tai lieu nay danh cho lap trinh vien hoac nguoi quan tri muon phat trien, mo rong hoac tuy bien **vdn ToolKit**.
 
-\*\*vdn ToolKit\*\* la bo cong cu quan tri he thong Windows toan dien, duoc viet bang PowerShell, cho phep ban kiem tra thong tin phan cung, quan ly ban quyen Windows va Office, cai dat phan mem hang loat, toi uu hieu suat va xuat bao cao chi trong vai thao tac.
+---
 
-\---
+## 1. Kien truc Modular
 
-\## Tinh nang
+He thong phan chia chuc nang thanh cac file script rieng biet trong thu muc `src/`:
 
-\- \*\*Thong tin he thong\*\*: Hien thi ten may, domain, OS, CPU, RAM, dung luong o dia.
+1. **`00_Params.ps1`**: Khai bao tham so dau vao. Bat buoc phai nam dau file phan phoi de PowerShell hieu duoc cac tham so `param(...)`.
+2. **`Core.ps1`**:
+   - `Write-Log`: Ham in log ra man hinh kem mau sac theo cap do (`INFO`, `SUCCESS`, `WARN`, `ERROR`).
+   - `Confirm-AdminPrivilege`: Kiem tra quyen Administrator, tu dong khoi chay lai voi quyen cao neu chua co.
+   - `Get-AppList` va `Download-Configuration`: Tai file cau hinh phan mem tu URL github hoac dung cau hinh mac dinh du phong.
+3. **`Licensing.ps1`**:
+   - `Get-WindowsLicenseInfo` / `Get-OfficeLicenseInfo`: Doc thong tin ban quyen bang slmgr va ospp.vbs.
+   - `Activate-Windows` / `Activate-Office`: Kich hoat qua KMS.
+   - `Remove-WindowsLicense` / `Remove-OfficeLicense`: Go sach ban quyen tren may.
+4. **`Software.ps1`**:
+   - Cai dat phan mem thong qua winget hoac tu tai link truc tiep va chay silent install (/quiet /norestart).
+5. **`Optimizer.ps1`**:
+   - Chua cac tweak toi uu o dia (SSD TRIM/HDD cache), he thong (Temp files), dich vu, Windows Update, va dac biet la don dep CarbonBlack Store.
+6. **`Printer.ps1`**:
+   - Quan ly may in, xoa may in nguoi dung, khoi chay printmanagement.msc.
+7. **`Main.ps1`**:
+   - Xu ly dieu huong (routing) khi chay CLI va chay giao dien Menu chinh.
 
-\- \*\*Ban quyen Windows\*\*: Kiem tra Edition, trang thai kich hoat, loai license, key cuoi.
+---
 
-\- \*\*Ban quyen Office\*\*: Hien thi tom tat cho cac phien ban Office 2010, 2013, 2016, 2019, 365.
+## 2. Huong dan Build (Compile)
 
-\- \*\*Kich hoat Windows/Office\*\*: Su dung key KMS mac dinh (co the tuy chinh).
+Khi ban sua doi bat ky code nao trong thu muc `src/`, hay chay script `build.ps1` o thu muc goc:
 
-\- \*\*Xoa ban quyen\*\*: Go sach key Windows va Office khoi he thong (co xac nhan).
+```powershell
+powershell -ExecutionPolicy Bypass -File build.ps1
+```
 
-\- \*\*Cai dat phan mem\*\*: Ho tro winget hoac tai truc tiep va cai silent.
+**Hoat dong cua build.ps1:**
+- Ghep noi cac script tu `src/` theo thu tu kien truc vao file `vdn_ToolKit.ps1`.
+- Dung PowerShell Parser `[System.Management.Automation.Language.Parser]` de quet loi cu phap cua file output.
+- Neu phat hien bat ky loi cu phap nao (ngoai le, dau ngoac, sai ten bien...), qua trinh build se dung lai va thong bao loi chi tiet.
 
-\- \*\*Toi uu he thong\*\*: Don rac, toi uu mang, hieu suat, tat dich vu, xoa cache Windows Update, toi uu o dia (SSD TRIM/HDD NTFS), tat Hibernate.
+---
 
-\- \*\*Quan ly may in\*\*: Xoa sach may in hoac mo Print Management.
+## 3. Huong dan Them/Bot Phan mem
 
-\- \*\*Xuat bao cao HTML\*\*: Luu bao cao tong hop vao thu muc Documents.
+Ban co the tuy chinh phan mem trong file `config/software.json`. Cau truc:
 
-\---
-
-\## Yeu cau
-
-\- Windows 10/11 (phien ban 1809 tro len).
-
-\- Quyen Administrator (tu dong yeu cau neu chua co).
-
-\- Ket noi Internet de tai script va cau hinh (lan dau chay).
-
-\- Winget (khuyen nghich) de cai dat phan mem.
-
-\---
-
-\## Cach chay
-
-Mo \*\*PowerShell\*\* voi quyen Administrator va nhap lenh:
-
-\`\`\`powershell
-
-irm https://raw.githubusercontent.com/vynguyenit/vnd\_ToolKit\_ps/main/vdn\_ToolKit.ps1 | iex
-
-Hoac neu ban da tai file ve:
-
-powershell
-
-powershell -ExecutionPolicy Bypass -File .\\vdn\_ToolKit.ps1
-
-Giao dien menu
-
-Sau khi chay, menu chinh hien thi:
-
-text
-
-\==================================================
-
-vdn ToolKit - He thong & Ban quyen
-
-\==================================================
-
-\[1\] Thong tin he thong
-
-\[2\] Ban quyen Windows
-
-\[3\] Ban quyen Office
-
-\[4\] Kich hoat Windows (KMS)
-
-\[5\] Kich hoat Office (KMS)
-
-\[6\] Xoa ban quyen Windows (Nguy hiem)
-
-\[7\] Xoa ban quyen Office (Nguy hiem)
-
-\[8\] Cai dat phan mem (winget)
-
-\[9\] Toi uu he thong (Optimizer)
-
-\[A\] Quan ly may in
-
-\[E\] Xuat bao cao HTML
-
-\[H\] Huong dan su dung
-
-\[0\] Thoat
-
-\==================================================
-
-Chon chuc nang \[1,2,3...A,E,H,0\]:
-
-Chon so hoac ky tu tuong ung de thuc hien.
-
-Cau hinh va tuy chinh
-
-Thay doi Key KMS
-
-Mo file vdn\_ToolKit.ps1, tim cac dong:
-
-powershell
-
-$key = "W269N-WFGWX-YVC9B-4J6C9-T83GX" # Windows
-
-$key = "FXYTK-NJJ8C-GB6DW-3DYQT-6F7TH" # Office
-
-Thay bang key cua ban.
-
-Them/bot phan mem
-
-Chinh sua file config/software.json tren GitHub (hoac tai ve va sua). Cau truc:
-
-json
-
+```json
 {
-
-"apps": \[
-
-{"name": "Ten hien thi", "id": "winget-id", "url": ""},
-
-{"name": "Khong co winget", "id": "", "url": "https://example.com/setup.exe"}
-
-\]
-
+  "apps": [
+    {
+      "name": "Ten hien thi",
+      "id": "winget.package.id",
+      "url": "https://url-tai-ve.com/setup.exe"
+    }
+  ]
 }
+```
 
-id: ID tren winget (de trong neu khong dung).
+- **id**: dung de cai qua Winget (khuyen khich vi nhanh va an toan). De trong neu khong ho tro.
+- **url**: duong dan truc tiep tai file setup (toolkit se tu tai va chay silent voi `/quiet /norestart`). De trong neu chi dung winget.
 
-url: Duong dan tai ve va cai silent (tham so mac dinh: /quiet /norestart).
+---
 
-Huong dan dong gop
+## 4. Giai thich ve Don dep CarbonBlack Store
 
-Fork repository.
-
-Tao nhanh moi (git checkout -b feature/your-feature).
-
-Commit thay doi (git commit -m 'Add something').
-
-Push len nhanh (git push origin feature/your-feature).
-
-Tao Pull Request.
-
-Giay phep
-
-Duoc phan phoi theo MIT License.
-
-Tac gia
-
-Vy Nguyen – GitHub
-
-Chuc ban su dung vdn ToolKit hieu qua!
-
-text
-
-\---
-
-\## 🚀 Cách sử dụng cuối cùng
-
-Người dùng chỉ cần mở \*\*PowerShell (Admin)\*\* và chạy:
-
-\`\`\`powershell
-
-irm https://raw.githubusercontent.com/vynguyenit/vnd\_ToolKit\_ps/main/vdn\_ToolKit.ps1 | iex
-
-Script sẽ tự động tải về, chạy, và tự dọn dẹp sau khi thoát. Toàn bộ thông báo đều bằng tiếng Việt không dấu, giao diện rõ ràng, không nhắc đến bất kỳ dự án bên ngoài.
-
-Bây giờ bạn có thể upload toàn bộ lên repository vnd\_ToolKit\_ps và sử dụng.
+- **Duong dan**: `%SystemRoot%\CarbonBlack\Store` (thuong la `C:\Windows\CarbonBlack\Store`).
+- **Co che hoat dong**:
+  1. Quet xem thu muc ton tai khong.
+  2. Tim cac dich vu lien quan (`cbdefense`, `CarbonBlack`, `CbEnterpriseSensorService`) va co gang tat chung.
+  3. Quet va xoa toan bo cac file log/event trong thu muc `Store`.
+  4. Su dung `try/catch` de bo qua cac file bi khoa hoac bi EDR bao ve (tamper protection) ma khong gay loi dung script.
+  5. Khoi dong lai cac dich vu CarbonBlack da tat.
